@@ -30,13 +30,6 @@ This project implements an interpreter built in pure Python. It supports:
 ```bash
 python main.py
 ```
-
-### Run from `.lox` file
-
-```bash
-python main.py all_stages.lox
-```
-
 ---
 
 ## 📂 Project Structure
@@ -51,8 +44,6 @@ LangDesign/
 ├── expressions.py       # AST expression classes
 ├── statements.py        # AST statement classes
 ├── interpreter.py       # Walks and evaluates the AST
-├── all_stages.lox       # Test script for all language features
-├── run_tests.bat        # Optional script to run all tests (Windows)
 └── README.md            # This file
 ```
 
@@ -120,13 +111,6 @@ while (x < 3) {
     x = x + 1
 }
 ```
-
-To run:
-
-```bash
-python main.py all_stages.lox
-```
-
 ---
 
 ## 👤 Author
