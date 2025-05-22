@@ -1,6 +1,7 @@
 from lditoken import TokenType
 from expressions import *
 
+
 class Interpreter:
     def evaluate(self, expr):
         if isinstance(expr, Literal):
@@ -18,7 +19,13 @@ class Interpreter:
             right = self.evaluate(expr.right)
 
             if expr.operator.type == TokenType.PLUS:
-                return left + right
+                if isinstance(left, str) and isinstance(right, str):
+                    return left + right
+                elif isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                    return left + right
+                else:
+                    raise Exception("Operands must be two numbers or two strings.")
+
             elif expr.operator.type == TokenType.MINUS:
                 return left - right
             elif expr.operator.type == TokenType.STAR:

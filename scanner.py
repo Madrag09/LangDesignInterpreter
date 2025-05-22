@@ -38,6 +38,8 @@ class Scanner:
             self.add_token(TokenType.LESS_EQUAL if self.match('=') else TokenType.LESS)
         elif c == '>':
             self.add_token(TokenType.GREATER_EQUAL if self.match('=') else TokenType.GREATER)
+        elif c == '"':
+            self.string()
         elif c.isdigit() or c == '.':
             self.number()
         elif c.isalpha():
@@ -48,6 +50,20 @@ class Scanner:
             self.line += 1
         else:
             print(f"[Line {self.line}] Unexpected character: {c}")
+
+    def string(self):
+        while self.peek() != '"' and not self.is_at_end():
+            if self.peek() == '\n':
+                self.line += 1
+            self.advance()
+
+        if self.is_at_end():
+            print(f"[Line {self.line}] Unterminated string.")
+            return
+
+        self.advance()  # closing "
+        value = self.source[self.start + 1:self.current - 1]
+        self.add_token(TokenType.STRING, value)
 
     def number(self):
         while self.peek().isdigit():

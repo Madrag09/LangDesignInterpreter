@@ -9,6 +9,8 @@ class TokenType(Enum):
     MINUS = auto()
     STAR = auto()
     SLASH = auto()
+
+    # One or two character tokens
     BANG = auto()
     EQUAL_EQUAL = auto()
     BANG_EQUAL = auto()
@@ -19,6 +21,7 @@ class TokenType(Enum):
 
     # Literals
     NUMBER = auto()
+    STRING = auto()
     TRUE = auto()
     FALSE = auto()
 
