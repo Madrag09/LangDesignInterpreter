@@ -1,6 +1,6 @@
 from lditoken import TokenType
 from expressions import *
-from statements import Print, Var, ExpressionStmt
+from statements import Print, Var, ExpressionStmt, If, While, Block
 
 
 class Parser:
@@ -16,7 +16,6 @@ class Parser:
 
     def declaration(self):
         if self.match(TokenType.IDENTIFIER) and self.match(TokenType.EQUAL):
-            # This is a variable declaration
             name = self.previous(2)
             initializer = self.expression()
             return Var(name, initializer)
@@ -25,11 +24,43 @@ class Parser:
     def statement(self):
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        if self.match(TokenType.IF):
+            return self.if_statement()
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
+        if self.match(TokenType.LEFT_BRACE):
+            return Block(self.block())
         return ExpressionStmt(self.expression())
 
     def print_statement(self):
         value = self.expression()
         return Print(value)
+
+    def if_statement(self):
+        self.consume(TokenType.LEFT_PAREN)
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN)
+        then_branch = self.statement()
+
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return If(condition, then_branch, else_branch)
+
+    def while_statement(self):
+        self.consume(TokenType.LEFT_PAREN)
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN)
+        body = self.statement()
+        return While(condition, body)
+
+    def block(self):
+        statements = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+        self.consume(TokenType.RIGHT_BRACE)
+        return statements
 
     def expression(self):
         return self.assignment()
@@ -38,9 +69,7 @@ class Parser:
         expr = self.or_()
 
         if self.match(TokenType.EQUAL):
-            equals = self.previous()
             value = self.assignment()
-
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name, value)
@@ -110,6 +139,7 @@ class Parser:
         if self.match(TokenType.STRING): return Literal(self.previous().literal)
         if self.match(TokenType.NUMBER): return Literal(self.previous().literal)
         if self.match(TokenType.IDENTIFIER): return Variable(self.previous())
+        if self.match(TokenType.INPUT): return Call(self.previous())
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN)

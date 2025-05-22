@@ -5,6 +5,8 @@ class TokenType(Enum):
     # Single-character tokens
     LEFT_PAREN = auto()
     RIGHT_PAREN = auto()
+    LEFT_BRACE = auto()
+    RIGHT_BRACE = auto()
     PLUS = auto()
     MINUS = auto()
     STAR = auto()
@@ -26,13 +28,15 @@ class TokenType(Enum):
     TRUE = auto()
     FALSE = auto()
 
-    # Logical
-    AND = auto()
-    OR = auto()
-
     # Identifiers and keywords
     IDENTIFIER = auto()
+    AND = auto()
+    OR = auto()
     PRINT = auto()
+    IF = auto()
+    ELSE = auto()
+    WHILE = auto()
+    INPUT = auto()
 
     # Misc
     EOF = auto()
@@ -46,4 +50,4 @@ class Token:
         self.line = line
 
     def __str__(self):
-        return f'{self.type} {self.lexeme} {self.literal}'
+        return f'{self.type.name} {self.lexeme} {self.literal}'

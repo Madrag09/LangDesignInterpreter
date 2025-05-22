@@ -4,6 +4,7 @@ from interpreter import Interpreter
 
 interpreter = Interpreter()  # <- Persistent across REPL input
 
+
 def run(source):
     scanner = Scanner(source)
     tokens = scanner.scan_tokens()
@@ -12,6 +13,7 @@ def run(source):
     statements = parser.parse()
 
     interpreter.interpret(statements)
+
 
 if __name__ == "__main__":
     while True:

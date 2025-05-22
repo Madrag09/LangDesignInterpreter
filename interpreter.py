@@ -1,6 +1,6 @@
 from lditoken import TokenType
 from expressions import *
-from statements import Print, Var, ExpressionStmt
+from statements import Print, Var, ExpressionStmt, If, While, Block
 
 
 class Interpreter:
@@ -20,6 +20,21 @@ class Interpreter:
             self.environment[stmt.name.lexeme] = value
         elif isinstance(stmt, ExpressionStmt):
             self.evaluate(stmt.expression)
+        elif isinstance(stmt, If):
+            if self.is_truthy(self.evaluate(stmt.condition)):
+                self.execute(stmt.then_branch)
+            elif stmt.else_branch is not None:
+                self.execute(stmt.else_branch)
+        elif isinstance(stmt, While):
+            while self.is_truthy(self.evaluate(stmt.condition)):
+                self.execute(stmt.body)
+        elif isinstance(stmt, Block):
+            self.execute_block(stmt.statements)
+
+    def execute_block(self, statements):
+        # NOTE: In a more advanced version, you'd use a new environment here
+        for stmt in statements:
+            self.execute(stmt)
 
     def evaluate(self, expr):
         if isinstance(expr, Literal):
@@ -35,6 +50,7 @@ class Interpreter:
         elif isinstance(expr, Binary):
             left = self.evaluate(expr.left)
             right = self.evaluate(expr.right)
+
             if expr.operator.type == TokenType.PLUS:
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
@@ -73,8 +89,16 @@ class Interpreter:
             value = self.evaluate(expr.value)
             self.environment[expr.name.lexeme] = value
             return value
+        elif isinstance(expr, Call) and expr.name.lexeme == "input":
+            return input()
 
     def is_truthy(self, value):
         if value is None: return False
         if isinstance(value, bool): return value
         return bool(value)
+
+
+# If you're using Call expression, include this in expressions.py
+class Call(Expr):
+    def __init__(self, name):
+        self.name = name
