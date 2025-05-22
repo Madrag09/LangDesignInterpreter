@@ -30,10 +30,10 @@ class Scanner:
             self.add_token(TokenType.STAR)
         elif c == '/':
             self.add_token(TokenType.SLASH)
+        elif c == '=':
+            self.add_token(TokenType.EQUAL)
         elif c == '!':
             self.add_token(TokenType.BANG_EQUAL if self.match('=') else TokenType.BANG)
-        elif c == '=':
-            if self.match('='): self.add_token(TokenType.EQUAL_EQUAL)
         elif c == '<':
             self.add_token(TokenType.LESS_EQUAL if self.match('=') else TokenType.LESS)
         elif c == '>':
@@ -56,12 +56,10 @@ class Scanner:
             if self.peek() == '\n':
                 self.line += 1
             self.advance()
-
         if self.is_at_end():
             print(f"[Line {self.line}] Unterminated string.")
             return
-
-        self.advance()  # closing "
+        self.advance()
         value = self.source[self.start + 1:self.current - 1]
         self.add_token(TokenType.STRING, value)
 
@@ -84,12 +82,10 @@ class Scanner:
             "false": TokenType.FALSE,
             "and": TokenType.AND,
             "or": TokenType.OR,
+            "print": TokenType.PRINT,
         }
-        token_type = keywords.get(text)
-        if token_type:
-            self.add_token(token_type)
-        else:
-            print(f"[Line {self.line}] Unknown identifier: {text}")
+        token_type = keywords.get(text, TokenType.IDENTIFIER)
+        self.add_token(token_type)
 
     def match(self, expected):
         if self.is_at_end(): return False

@@ -1,5 +1,7 @@
 from lditoken import TokenType
 from expressions import *
+from statements import Print, Var, ExpressionStmt
+
 
 class Parser:
     def __init__(self, tokens):
@@ -7,10 +9,44 @@ class Parser:
         self.current = 0
 
     def parse(self):
-        return self.expression()
+        statements = []
+        while not self.is_at_end():
+            statements.append(self.declaration())
+        return statements
+
+    def declaration(self):
+        if self.match(TokenType.IDENTIFIER) and self.match(TokenType.EQUAL):
+            # This is a variable declaration
+            name = self.previous(2)
+            initializer = self.expression()
+            return Var(name, initializer)
+        return self.statement()
+
+    def statement(self):
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+        return ExpressionStmt(self.expression())
+
+    def print_statement(self):
+        value = self.expression()
+        return Print(value)
 
     def expression(self):
-        return self.or_()
+        return self.assignment()
+
+    def assignment(self):
+        expr = self.or_()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name, value)
+            raise Exception("Invalid assignment target.")
+
+        return expr
 
     def or_(self):
         expr = self.and_()
@@ -73,6 +109,7 @@ class Parser:
         if self.match(TokenType.TRUE): return Literal(True)
         if self.match(TokenType.STRING): return Literal(self.previous().literal)
         if self.match(TokenType.NUMBER): return Literal(self.previous().literal)
+        if self.match(TokenType.IDENTIFIER): return Variable(self.previous())
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN)
@@ -104,5 +141,5 @@ class Parser:
     def peek(self):
         return self.tokens[self.current]
 
-    def previous(self):
-        return self.tokens[self.current - 1]
+    def previous(self, steps=1):
+        return self.tokens[self.current - steps]

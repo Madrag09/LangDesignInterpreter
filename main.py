@@ -1,30 +1,26 @@
-import sys
 from scanner import Scanner
 from parser import Parser
 from interpreter import Interpreter
 
+interpreter = Interpreter()  # <- Persistent across REPL input
 
 def run(source):
     scanner = Scanner(source)
     tokens = scanner.scan_tokens()
-    parser = Parser(tokens)
-    expression = parser.parse()
-    interpreter = Interpreter()
-    result = interpreter.evaluate(expression)
-    print(result)
 
+    parser = Parser(tokens)
+    statements = parser.parse()
+
+    interpreter.interpret(statements)
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
-        with open(sys.argv[1], "r") as file:
-            run(file.read())
-    else:
-        while True:
-            try:
-                line = input(">>> ")
-                if line.strip() == "": continue
-                run(line)
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                print(f"Error: {e}")
+    while True:
+        try:
+            line = input(">>> ")
+            if line.strip() == "":
+                continue
+            run(line)
+        except Exception as e:
+            print(f"Error: {e}")
+        except KeyboardInterrupt:
+            break

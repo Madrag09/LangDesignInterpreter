@@ -12,6 +12,7 @@ class TokenType(Enum):
 
     # One or two character tokens
     BANG = auto()
+    EQUAL = auto()
     EQUAL_EQUAL = auto()
     BANG_EQUAL = auto()
     GREATER = auto()
@@ -28,6 +29,10 @@ class TokenType(Enum):
     # Logical
     AND = auto()
     OR = auto()
+
+    # Identifiers and keywords
+    IDENTIFIER = auto()
+    PRINT = auto()
 
     # Misc
     EOF = auto()

@@ -1,8 +1,26 @@
 from lditoken import TokenType
 from expressions import *
+from statements import Print, Var, ExpressionStmt
 
 
 class Interpreter:
+    def __init__(self):
+        self.environment = {}
+
+    def interpret(self, statements):
+        for stmt in statements:
+            self.execute(stmt)
+
+    def execute(self, stmt):
+        if isinstance(stmt, Print):
+            value = self.evaluate(stmt.expression)
+            print(value)
+        elif isinstance(stmt, Var):
+            value = self.evaluate(stmt.initializer)
+            self.environment[stmt.name.lexeme] = value
+        elif isinstance(stmt, ExpressionStmt):
+            self.evaluate(stmt.expression)
+
     def evaluate(self, expr):
         if isinstance(expr, Literal):
             return expr.value
@@ -17,7 +35,6 @@ class Interpreter:
         elif isinstance(expr, Binary):
             left = self.evaluate(expr.left)
             right = self.evaluate(expr.right)
-
             if expr.operator.type == TokenType.PLUS:
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
@@ -25,7 +42,6 @@ class Interpreter:
                     return left + right
                 else:
                     raise Exception("Operands must be two numbers or two strings.")
-
             elif expr.operator.type == TokenType.MINUS:
                 return left - right
             elif expr.operator.type == TokenType.STAR:
@@ -48,7 +64,15 @@ class Interpreter:
                 return self.is_truthy(left) and self.is_truthy(right)
             elif expr.operator.type == TokenType.OR:
                 return self.is_truthy(left) or self.is_truthy(right)
-        raise Exception("Unknown expression type.")
+        elif isinstance(expr, Variable):
+            name = expr.name.lexeme
+            if name in self.environment:
+                return self.environment[name]
+            raise Exception(f"Undefined variable '{name}'.")
+        elif isinstance(expr, Assign):
+            value = self.evaluate(expr.value)
+            self.environment[expr.name.lexeme] = value
+            return value
 
     def is_truthy(self, value):
         if value is None: return False
