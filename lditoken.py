@@ -9,9 +9,22 @@ class TokenType(Enum):
     MINUS = auto()
     STAR = auto()
     SLASH = auto()
+    BANG = auto()
+    EQUAL_EQUAL = auto()
+    BANG_EQUAL = auto()
+    GREATER = auto()
+    GREATER_EQUAL = auto()
+    LESS = auto()
+    LESS_EQUAL = auto()
 
     # Literals
     NUMBER = auto()
+    TRUE = auto()
+    FALSE = auto()
+
+    # Logical
+    AND = auto()
+    OR = auto()
 
     # Misc
     EOF = auto()
@@ -26,6 +39,3 @@ class Token:
 
     def __str__(self):
         return f'{self.type} {self.lexeme} {self.literal}'
-
-    if __name__ == "__main__":
-        print("Token module loaded successfully.")
