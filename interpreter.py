@@ -1,6 +1,6 @@
 from lditoken import TokenType
 from expressions import *
-from statements import Print, Var, ExpressionStmt, If, While, Block
+from statements import *
 
 
 class Interpreter:
@@ -23,18 +23,14 @@ class Interpreter:
         elif isinstance(stmt, If):
             if self.is_truthy(self.evaluate(stmt.condition)):
                 self.execute(stmt.then_branch)
-            elif stmt.else_branch is not None:
+            elif stmt.else_branch:
                 self.execute(stmt.else_branch)
         elif isinstance(stmt, While):
             while self.is_truthy(self.evaluate(stmt.condition)):
                 self.execute(stmt.body)
         elif isinstance(stmt, Block):
-            self.execute_block(stmt.statements)
-
-    def execute_block(self, statements):
-        # NOTE: In a more advanced version, you'd use a new environment here
-        for stmt in statements:
-            self.execute(stmt)
+            for s in stmt.statements:
+                self.execute(s)
 
     def evaluate(self, expr):
         if isinstance(expr, Literal):
@@ -50,35 +46,36 @@ class Interpreter:
         elif isinstance(expr, Binary):
             left = self.evaluate(expr.left)
             right = self.evaluate(expr.right)
+            op = expr.operator.type
 
-            if expr.operator.type == TokenType.PLUS:
+            if op == TokenType.PLUS:
                 if isinstance(left, str) and isinstance(right, str):
                     return left + right
                 elif isinstance(left, (int, float)) and isinstance(right, (int, float)):
                     return left + right
                 else:
-                    raise Exception("Operands must be two numbers or two strings.")
-            elif expr.operator.type == TokenType.MINUS:
+                    raise Exception("Operands must be both numbers or both strings.")
+            elif op == TokenType.MINUS:
                 return left - right
-            elif expr.operator.type == TokenType.STAR:
+            elif op == TokenType.STAR:
                 return left * right
-            elif expr.operator.type == TokenType.SLASH:
+            elif op == TokenType.SLASH:
                 return left / right
-            elif expr.operator.type == TokenType.EQUAL_EQUAL:
+            elif op == TokenType.EQUAL_EQUAL:
                 return left == right
-            elif expr.operator.type == TokenType.BANG_EQUAL:
+            elif op == TokenType.BANG_EQUAL:
                 return left != right
-            elif expr.operator.type == TokenType.GREATER:
+            elif op == TokenType.GREATER:
                 return left > right
-            elif expr.operator.type == TokenType.GREATER_EQUAL:
+            elif op == TokenType.GREATER_EQUAL:
                 return left >= right
-            elif expr.operator.type == TokenType.LESS:
+            elif op == TokenType.LESS:
                 return left < right
-            elif expr.operator.type == TokenType.LESS_EQUAL:
+            elif op == TokenType.LESS_EQUAL:
                 return left <= right
-            elif expr.operator.type == TokenType.AND:
+            elif op == TokenType.AND:
                 return self.is_truthy(left) and self.is_truthy(right)
-            elif expr.operator.type == TokenType.OR:
+            elif op == TokenType.OR:
                 return self.is_truthy(left) or self.is_truthy(right)
         elif isinstance(expr, Variable):
             name = expr.name.lexeme
@@ -89,16 +86,10 @@ class Interpreter:
             value = self.evaluate(expr.value)
             self.environment[expr.name.lexeme] = value
             return value
-        elif isinstance(expr, Call) and expr.name.lexeme == "input":
+        elif isinstance(expr, Call):
             return input()
 
     def is_truthy(self, value):
         if value is None: return False
         if isinstance(value, bool): return value
         return bool(value)
-
-
-# If you're using Call expression, include this in expressions.py
-class Call(Expr):
-    def __init__(self, name):
-        self.name = name

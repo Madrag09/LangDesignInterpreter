@@ -44,6 +44,10 @@ class Scanner:
             self.add_token(TokenType.GREATER_EQUAL if self.match('=') else TokenType.GREATER)
         elif c == '"':
             self.string()
+        elif c == '#':
+            # Skip the rest of the line for comments
+            while self.peek() != '\n' and not self.is_at_end():
+                self.advance()
         elif c.isdigit() or c == '.':
             self.number()
         elif c.isalpha():

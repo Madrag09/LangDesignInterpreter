@@ -22,14 +22,10 @@ class Parser:
         return self.statement()
 
     def statement(self):
-        if self.match(TokenType.PRINT):
-            return self.print_statement()
-        if self.match(TokenType.IF):
-            return self.if_statement()
-        if self.match(TokenType.WHILE):
-            return self.while_statement()
-        if self.match(TokenType.LEFT_BRACE):
-            return Block(self.block())
+        if self.match(TokenType.PRINT): return self.print_statement()
+        if self.match(TokenType.IF): return self.if_statement()
+        if self.match(TokenType.WHILE): return self.while_statement()
+        if self.match(TokenType.LEFT_BRACE): return Block(self.block())
         return ExpressionStmt(self.expression())
 
     def print_statement(self):
@@ -41,11 +37,7 @@ class Parser:
         condition = self.expression()
         self.consume(TokenType.RIGHT_PAREN)
         then_branch = self.statement()
-
-        else_branch = None
-        if self.match(TokenType.ELSE):
-            else_branch = self.statement()
-
+        else_branch = self.statement() if self.match(TokenType.ELSE) else None
         return If(condition, then_branch, else_branch)
 
     def while_statement(self):
@@ -67,14 +59,11 @@ class Parser:
 
     def assignment(self):
         expr = self.or_()
-
         if self.match(TokenType.EQUAL):
             value = self.assignment()
             if isinstance(expr, Variable):
-                name = expr.name
-                return Assign(name, value)
+                return Assign(expr.name, value)
             raise Exception("Invalid assignment target.")
-
         return expr
 
     def or_(self):
@@ -128,9 +117,7 @@ class Parser:
 
     def unary(self):
         if self.match(TokenType.BANG, TokenType.MINUS):
-            operator = self.previous()
-            right = self.unary()
-            return Unary(operator, right)
+            return Unary(self.previous(), self.unary())
         return self.primary()
 
     def primary(self):
@@ -158,8 +145,7 @@ class Parser:
         raise Exception(f"Expected token {type}")
 
     def check(self, type):
-        if self.is_at_end(): return False
-        return self.peek().type == type
+        return not self.is_at_end() and self.peek().type == type
 
     def advance(self):
         if not self.is_at_end(): self.current += 1
